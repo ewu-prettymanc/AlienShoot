@@ -1,0 +1,101 @@
+#include "whackaclown.h"
+
+whackaclown::whackaclown()
+  : base_game( (char*) "imgs/back/back.jpg", 1200, 833) 
+{
+  SDL_Rect b;
+
+  b.x = 0;
+  b.y = 0;
+  b.w = _screen->w;
+  b.h = _screen->h;
+
+  _pie_disp = new image_bank_display( (char*) "imgs/pie/pie", 
+				      (char*) ".png", 7);
+					   
+  assert(_pie_disp);
+
+  _pie = new pie(_pie_disp);
+  assert(_pie);
+		
+  _clowns = new clown_array( (char*) "imgs/ford/ford", (char*)".png", 28,CLOWN_SPAWN_PER, b);
+  assert(_clowns);
+
+  _score = new score( (char*) "imgs/font/font.ttf", SCORE_FONT);
+  assert(_score);
+
+  _boing = new sound_bank((char*) "imgs/sound/boing",
+			  (char*) ".wav", 3);
+  assert(_boing);
+
+}
+
+whackaclown::~whackaclown()
+{
+  delete _pie;
+  delete _clowns;
+  delete _pie_disp;
+  delete _score;
+  delete _boing;
+}
+
+
+void whackaclown::handle_events()
+{
+  int inc;
+
+
+  if ( _event.type == SDL_KEYDOWN )
+  {
+    if ( _event.key.keysym.sym == SDLK_ESCAPE )
+    {
+      done();
+      return;
+    }
+    return;
+  }
+
+  if ( _event.type == SDL_MOUSEMOTION )
+  {
+    _pie->set_xy( _event.motion.x, _event.motion.y);
+    return;
+  }
+
+  if ( _event.type == SDL_MOUSEBUTTONDOWN )
+  {
+    _pie->start();
+    inc = _clowns->hit(_event.button.x, _event.button.y);
+    if ( inc > 0 )
+    {
+      _score->inc_rate(inc);
+      _boing->play_random_sound();
+    }
+    return;
+  }
+
+
+  base_game::handle_events();
+}
+
+void whackaclown::handle_collisions()
+{
+  _clowns->move();
+}
+
+void whackaclown::draw()
+{
+  base_game::draw();
+  
+  _clowns->draw(_screen);
+  _pie->draw(_screen);
+  _score->draw(_screen);
+}
+
+void whackaclown::set_up()
+{
+  _clowns->spawn_clowns(CLOWN_INIT);
+
+  _score->clear();
+}
+
+

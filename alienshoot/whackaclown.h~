@@ -1,0 +1,44 @@
+#ifndef __WHACKACLOWN_H__
+#define __WHACKACLOWN_H__
+
+
+#include<SDL_ttf.h>
+
+#include "base_game.h"
+#include "clown_array.h"
+#include "pie.h"
+#include "score.h"
+#include "sound_bank.h"
+
+#define CLOWN_SPAWN_PER .01
+
+
+#define CLOWN_INIT 5
+
+#define SCORE_FONT 40
+
+class whackaclown : public base_game
+{
+ public:
+
+  whackaclown();
+  ~whackaclown();
+
+ protected:
+
+  virtual void handle_events();
+  virtual void handle_collisions(); 
+  virtual void draw();
+  virtual void set_up();
+
+  score * _score;
+  pie * _pie;
+
+  clown_array * _clowns;
+  image_bank_display * _pie_disp;
+  sound_bank *_boing;
+
+};
+
+
+#endif

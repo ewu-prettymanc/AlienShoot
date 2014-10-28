@@ -1,0 +1,81 @@
+#include "clown_array.h"
+
+#include <string.h>
+#include "image_bank_display.h"
+
+clown_array::clown_array(char *fileroot, char * ext, 
+			 int frames, double spawn_rate, 
+			 SDL_Rect bounds)
+  : sprite_array(), _spawn_rate(spawn_rate), _bounds(bounds)
+{
+
+  _disp = new image_bank_display(fileroot, ext, frames);
+  assert(_disp);
+}
+
+clown_array::~clown_array()
+{
+  delete _disp;
+}
+
+void clown_array::spawn_clowns(int howmany)
+{
+  int i, x, y, dx, dy;
+  bounded_sprite * g;
+
+  for ( i = 0; i < howmany; i ++ )
+  {
+    g = new bounded_sprite(_disp, _bounds);
+    assert(g);
+
+    x = rand() % ( _bounds.w - g->get_width() ) + _bounds.x;
+    y = rand() % ( _bounds.h - g->get_height() ) + _bounds.y;
+
+    dx = rand()%(MAX_CLOWN_POS*2) - MAX_CLOWN_POS;
+    dy = rand()%(MAX_CLOWN_POS*2) - MAX_CLOWN_POS;
+
+    g->set_xy(x,y,0);
+    g->set_dxdy(dx, dy);
+
+    add(g);
+  }
+}
+
+void clown_array::draw(SDL_Surface * screen)
+{
+  sprite_array::draw(screen);
+  double per = (double) rand()/(double) RAND_MAX;
+
+  if ( per <= _spawn_rate )
+    spawn_clowns(1);
+
+}
+
+int clown_array::at_edge()
+{
+  int i;
+  bounded_sprite * g;
+
+  for ( i = 0; i < _curr_size; i ++ )
+  {
+    g = (bounded_sprite *) _img[i];
+
+    if ( g->at_edge() )
+      return 1;
+  }
+
+  return 0;
+}
+
+int clown_array::hit(int x, int y)
+{
+  int i, total = 0;
+  for ( i = 0; i < _curr_size; i ++ )
+    if ( _img[i]->check_point(x,y) )
+    {
+      kill(i);
+      i--;
+      total ++;
+    }
+  return total;
+}

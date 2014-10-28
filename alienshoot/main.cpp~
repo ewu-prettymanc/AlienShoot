@@ -1,0 +1,12 @@
+#include "whackaclown.h"
+
+
+int main()
+{
+  srand(time(0));
+  whackaclown g;
+  
+  g.play_game();
+
+  return 0;
+}
